@@ -48,6 +48,52 @@ characters_HP = [['Hannah Abbott', 'Hannah', 'Abbott'], ['Katie Bell', 'Katie'],
                  'Fawkes', 'Hedwig', 'Nagini', 'Nearly Headless Nick', 'Norbert', 'Peeves', 'Scabbers', 'Trevor'
                  ]
 
+characters_WP = [['Анна Павловна Шерер', 'Anna Pavlovna', 'Scherer'],
+                 ['князь Василий', 'Vasili Kuragin', 'Prince Vasili'],
+                 ['Элен', 'Helene', 'Countess Bezukhova'],
+                 ['Пьер Безухов', 'Pierre'],
+                 ['Ипполит Курагин', 'Hippolyte'],
+                 ['Андрей Болконский', 'Andrew'],
+                 ['Анна Михайловна Друбецкая', 'Princess Drubetskaya'],
+                 ['Анатоль Курагин', 'Anatole'],
+                 ['Долохов', 'Dolokhov'],
+                 ['Наташа Ростова', 'Natasha'],
+                 #['Илья Ростов', 'Ilya Rostov'],
+                 ['Вера Ростова', 'Vera'],
+                 ['Николай Ростов', 'Nicholas'],
+                 ['Николай Андреевич Болконский', 'Nicholas Andreevich', 'Nicholas Bolkonski', 'Prince Bolkonski'],
+                 ['Петя Ростов', 'Petya'],
+                 ['Соня', 'Sonya'],
+                 ['Борис Друбецкой', 'Boris'],
+                 ['Шиншин', 'Shinshin'],
+                 ['Альфонс Карлович Берг', 'Berg'],
+                 ['Марья Дмитриевна', 'Marya Dmitrievna'],
+                 ['княжна Марья', 'Princess Mary'],
+                 ['мадмуазель Бурьенн', 'Bourienne'],
+                 ['Тихон Щербатый', 'Tikhon'],
+                 ['Михаил Иванович', 'Michael Ivanovich'],
+                 ['Кутузов', 'Kutuzov'],
+                 ['Несвицкий', 'Nesvitski'],
+                 ['Жерков', 'Zherkov'],
+                 ['генерал Мак', 'Mack'],
+                 ['Денисов', 'Denisov'],
+                 ['Лаврушка', 'Lavrushka'],
+                 ['Билибин', 'Bilibin'],
+                 ['император Франц', 'Francis'],
+                 ['Багратион', 'Bagration'],
+                 ['Тушин', 'Tushin'],
+                 ['Яков Алпатыч', 'Yakov Alpatych'],
+                 ['Александр I', 'Alexander'],
+                 ['генерал Вейротер', 'Weyrother'],
+                 #['Милорадович', 'Miloradovich'],
+                 ['Наполеон', 'Napoleon', 'Bonaparte'],
+                 ['Вилларский', 'Willarski'],
+                 ['Аракчеев', 'Arakcheev'],
+                 ['Ростопчин', 'Rostopchin'],
+                 ['Балага', 'Balaga'],
+                 ['Мюрат', 'Murat'],
+                 #['Даву', 'Davout']
+]
 
 def plotgraph(filename, characters, title, community=True):
     m = len(characters)
@@ -90,7 +136,7 @@ def plotgraph(filename, characters, title, community=True):
     g1 = g.copy()
     edges_to_delete = []
     for e in g1.es:
-        if e['weight'] < maxweight / 5:
+        if e['weight'] < maxweight / 30:
             edges_to_delete.append(e)
     g1.delete_edges(edges_to_delete)
     if community:
@@ -119,10 +165,10 @@ def plotgraph(filename, characters, title, community=True):
     for e in g.es:
         e['width'] = e['weight'] * 4 / maxweight
     visual_style = {'vertex_size': 5,
-                    'vertex_label_size': 15,
+                    'vertex_label_size': 18,
                     'vertex_label_dist': 3,
                     'bbox': (1000, 1000),
-                    'margin': 100,
+                    'margin': 120,
                     'edge_curved': True}
 
     plot = Plot(target=filename + '.png', bbox=(1000, 1000), background="white")
@@ -134,7 +180,7 @@ def plotgraph(filename, characters, title, community=True):
     drawer.draw_at(0, 40, width=1000)
     plot.save()
 
-
+"""
 plotgraph('HP1', characters_HP, 'Harry Potter and the Philosopher\'s Stone', community=False)
 plotgraph('HP2', characters_HP, 'Harry Potter and the Chamber of Secrets', community=False)
 plotgraph('HP3', characters_HP, 'Harry Potter and the Prisoner of Azkaban', community=False)
@@ -146,3 +192,6 @@ plotgraph('HP7', characters_HP, 'Harry Potter and the Deathly Hallows', communit
 plotgraph('LOR1', characters_LOR, 'The Lord of the Rings: The Fellowship of the Ring')
 plotgraph('LOR2', characters_LOR, 'The Lord of the Rings: The Two Towers')
 plotgraph('LOR3', characters_LOR, 'The Lord of the Rings: The Return of the King')
+"""
+
+plotgraph('WP', characters_WP, 'Война и мир')
