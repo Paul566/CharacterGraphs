@@ -46,7 +46,7 @@ characters_HP = [['Hannah Abbott', 'Hannah', 'Abbott'], ['Katie Bell', 'Katie'],
                  ['Molly Weasley', 'Molly'], ['Percy Weasley', 'Percy'], ['Ron Weasley', 'Ron'],
                  ['Oliver Wood', 'Oliver', 'Wood'], 'The Bloody Baron', 'Dobby', 'The Fat Lady',
                  'Fawkes', 'Hedwig', 'Nagini', 'Nearly Headless Nick', 'Norbert', 'Peeves', 'Scabbers', 'Trevor'
-        ]
+                 ]
 
 
 def plotgraph(filename, characters, title, community=True):
@@ -66,8 +66,6 @@ def plotgraph(filename, characters, title, community=True):
     with open(filename + '.pdf', 'rb') as f:
         pdf = pdftotext.PDF(f)
         for pg in pdf:
-            #print('page', i, 'of', n)
-            #pg = pdf.getPage(i).extractText()
             tmp = [0] * m
             for i in range(m):
                 if type(characters[i]) is list:
@@ -116,8 +114,6 @@ def plotgraph(filename, characters, title, community=True):
     g.delete_vertices(vertices_to_delete)
     g1.delete_vertices(vertices_to_delete)
 
-
-    #coords = g1.layout_fruchterman_reingold()
     coords = g1.layout_kamada_kawai()
 
     for e in g.es:
@@ -128,7 +124,6 @@ def plotgraph(filename, characters, title, community=True):
                     'bbox': (1000, 1000),
                     'margin': 100,
                     'edge_curved': True}
-    #plot(g, target=filename + '.png', layout=coords, **visual_style)
 
     plot = Plot(target=filename + '.png', bbox=(1000, 1000), background="white")
     plot.add(g, layout=coords, **visual_style)
@@ -137,7 +132,6 @@ def plotgraph(filename, characters, title, community=True):
     ctx.set_font_size(24)
     drawer = TextDrawer(ctx, title, halign=TextDrawer.CENTER)
     drawer.draw_at(0, 40, width=1000)
-    #drawer.draw()
     plot.save()
 
 
