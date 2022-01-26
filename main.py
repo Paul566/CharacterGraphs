@@ -3,8 +3,9 @@ from igraph.drawing.text import TextDrawer
 import cairo
 import pdftotext
 import json
+import numpy as np
 
-def getAdjMatrix(pdfFilename, charactersFilename):
+def getConnectionData(pdfFilename, charactersFilename):
     with open(charactersFilename, 'r') as f:
         characters = json.load(f)
     m = len(characters)
@@ -30,51 +31,51 @@ def getAdjMatrix(pdfFilename, charactersFilename):
                         adjMatrix[i][j] += 1
                         adjMatrix[j][i] += 1
 
-def plotgraph(pdfFilename, charactersFilename, title, picFilename):
-    with open(charactersFilename, 'r') as f:
-        characters = json.load(f)
-    m = len(characters)
+    names = []
+    for name in characters:
+        if (type(name)) is list:
+            names.append(name[0])
+        else:
+            names.append(name)
+    return adjMatrix, names
+
+
+def getDistanceMatrix(adjMatrix):
+    m = len(adjMatrix)
+    distMatrix = np.zeros((m, m))
+    degs = np.zeros(m)
+    for i in range(m):
+        degs[i] = np.sum(adjMatrix[i])
+    for i in range(m):
+        for j in range(i):
+            distMatrix[i][j] = np.sqrt((degs[i] + 1) * (degs[j] + 1)) / (adjMatrix[i][j] + 1)
+            distMatrix[j][i] = distMatrix[i][j]
+    return distMatrix
+
+
+def plotgraph(adjMatrix, names, title, picFilename, communityThreshold=10, characterTheshold=0.05):
+    m = len(names)
     g = Graph()
     g.add_vertices(m)
     for i in range(m):
-        if type(characters[i]) is list:
-            g.vs[i]['label'] = characters[i][0]
-        else:
-            g.vs[i]['label'] = characters[i]
-    for i in range(m):
+        g.vs[i]['label'] = names[i]
         for j in range(i, m):
             g.add_edge(i, j)
-            g.es[g.get_eid(i, j)]['weight'] = 0
-
-    with open(pdfFilename, 'rb') as f:
-        pdf = pdftotext.PDF(f)
-        for pg in pdf:
-            tmp = [0] * m
-            for i in range(m):
-                if type(characters[i]) is list:
-                    for charname in characters[i][1:]:
-                        if pg.find(charname) != -1:
-                            tmp[i] = 1
-                else:
-                    if pg.find(characters[i]) != -1:
-                        tmp[i] = 1
-            for i in range(m):
-                if not tmp[i]:
-                    continue
-                for j in range(m):
-                    if tmp[j] and i != j:
-                        g.es[g.get_eid(i, j)]['weight'] += 1
+            g.es[g.get_eid(i, j)]['weight'] = adjMatrix[i][j]
 
     maxweight = 0
     for e in g.es:
         if maxweight < e['weight']:
             maxweight = e['weight']
 
+    # get a layout that reflects the presence of communities
     g1 = g.copy()
+    distMatrix = getDistanceMatrix(adjMatrix)
     edges_to_delete = []
-    for e in g1.es:
-        if e['weight'] < maxweight / 15:
-            edges_to_delete.append(e)
+    for i in range(m):
+        for j in range(i):
+            if distMatrix[i][j] > communityThreshold:
+                edges_to_delete.append(g1.get_eid(i, j))
     g1.delete_edges(edges_to_delete)
     cl = g1.community_fastgreedy(weights=g1.es['weight'])
     membership = cl.as_clustering().membership
@@ -84,9 +85,10 @@ def plotgraph(pdfFilename, charactersFilename, title, picFilename):
             edges_to_delete.append(e)
     g1.delete_edges(edges_to_delete)
 
+    # delete irrelevant vertices
     edges_to_delete = []
     for e in g.es:
-        if e['weight'] < maxweight / 50:
+        if e['weight'] < maxweight * characterTheshold:
             edges_to_delete.append(e)
     g.delete_edges(edges_to_delete)
     vertices_to_delete = []
@@ -97,7 +99,6 @@ def plotgraph(pdfFilename, charactersFilename, title, picFilename):
     g1.delete_vertices(vertices_to_delete)
 
     coords = g1.layout_kamada_kawai()
-
     for e in g.es:
         e['width'] = e['weight'] * 3 / maxweight
     visual_style = {'vertex_size': 5,
@@ -106,7 +107,6 @@ def plotgraph(pdfFilename, charactersFilename, title, picFilename):
                     'bbox': (1000, 1000),
                     'margin': 120,
                     'edge_curved': True}
-
     plot = Plot(target=picFilename, bbox=(1000, 1000), background="white")
     plot.add(g, layout=coords, **visual_style)
     plot.redraw()
@@ -116,20 +116,30 @@ def plotgraph(pdfFilename, charactersFilename, title, picFilename):
     drawer.draw_at(0, 40, width=1000)
     plot.save()
 
-"""
-plotgraph('pdfs/HP1.pdf', 'characters_HP', 'Harry Potter and the Philosopher\'s Stone', 'HP1.png')
-plotgraph('pdfs/HP2.pdf', 'characters_HP', 'Harry Potter and the Chamber of Secrets', 'HP2.png')
-plotgraph('pdfs/HP3.pdf', 'characters_HP', 'Harry Potter and the Prisoner of Azkaban', 'HP3.png')
-plotgraph('pdfs/HP4.pdf', 'characters_HP', 'Harry Potter and the Goblet of Fire', 'HP4.png')
-plotgraph('pdfs/HP5.pdf', 'characters_HP', 'Harry Potter and the Order of the Phoenix', 'HP5.png')
-plotgraph('pdfs/HP6.pdf', 'characters_HP', 'Harry Potter and the Half-Blood Prince', 'HP6.png')
-plotgraph('pdfs/HP7.pdf', 'characters_HP', 'Harry Potter and the Deathly Hallows', 'HP7.png')
 
-plotgraph('pdfs/LTR1.pdf', 'characters_LTR', 'The Lord of the Rings: The Fellowship of the Ring', 'LTR1.png')
-plotgraph('pdfs/LTR2.pdf', 'characters_LTR', 'The Lord of the Rings: The Two Towers', 'LTR2.png')
-plotgraph('pdfs/LTR3.pdf', 'characters_LTR', 'The Lord of the Rings: The Return of the King', 'LTR3.png')
+if __name__ == '__main__':
+    adjMatrix, names = getConnectionData('pdfs/SIF1.pdf', 'characters_SIF')
+    plotgraph(adjMatrix, names, 'A Game of Thrones', 'SIF1.png', communityThreshold=25, characterTheshold=0.1)
+    adjMatrix, names = getConnectionData('pdfs/SIF2.pdf', 'characters_SIF')
+    plotgraph(adjMatrix, names, 'A Clash of Kings', 'SIF2.png', communityThreshold=17)
+    adjMatrix, names = getConnectionData('pdfs/SIF3.pdf', 'characters_SIF')
+    plotgraph(adjMatrix, names, 'A Storm of Swords', 'SIF3.png', communityThreshold=20)
+    adjMatrix, names = getConnectionData('pdfs/SIF4.pdf', 'characters_SIF')
+    plotgraph(adjMatrix, names, 'A Feast for Crows', 'SIF4.png', communityThreshold=13)
+    adjMatrix, names = getConnectionData('pdfs/SIF5.pdf', 'characters_SIF')
+    plotgraph(adjMatrix, names, 'A Dance with Dragons', 'SIF5.png', communityThreshold=21)
 
-plotgraph('pdfs/WP.pdf', 'characters_WP', 'Война и мир', 'WP.png')
-"""
 
-plotgraph('pdfs/MM.pdf', 'characters_MM', 'Мастер и Маргарита', 'MM.png')
+    '''
+    adjMatrix, names = getConnectionData('pdfs/HP1.pdf', 'characters_HP')
+    plotgraph(adjMatrix, names, 'Harry Potter and the Philosopher\'s Stone', 'HP1.png')
+
+    adjMatrix, names = getConnectionData('pdfs/LTR1.pdf', 'characters_LTR')
+    plotgraph(adjMatrix, names, 'The Lord of the Rings: The Fellowship of the Ring', 'LTR1.png')
+
+    adjMatrix, names = getConnectionData('pdfs/WP.pdf', 'characters_WP')
+    plotgraph(adjMatrix, names, 'Война и мир', 'WP.png')
+
+    adjMatrix, names = getConnectionData('pdfs/MM.pdf', 'characters_MM')
+    plotgraph(adjMatrix, names, 'Мастер и Маргарита', 'MM.png')
+    '''
