@@ -44,7 +44,7 @@ def getConnectionData(pdfFilename, charactersFilename):
             flags = np.zeros(m)
             for i in range(m):
                 if type(characters[i]) is list:
-                    for charname in characters[i][1:]:
+                    for charname in characters[i]:
                         if pg.find(charname) != -1:
                             flags[i] = 1
                 else:
@@ -198,7 +198,7 @@ def plotAll():
     adjMatrix, names = getConnectionData('pdfs/MM.pdf', 'characterLists/characters_MM')
     plotgraph(adjMatrix, names, 'Мастер и Маргарита', 'MM.png', communityThreshold=25)
     adjMatrix, names = getConnectionData('pdfs/MM.pdf', 'characterLists/characters_MM_en')
-    plotgraph(adjMatrix, names, 'The Master and Margarite', 'MM_en.png', communityThreshold=25)
+    plotgraph(adjMatrix, names, 'The Master and Margarita', 'MM_en.png', communityThreshold=25)
 
     adjMatrix, names = getConnectionData('pdfs/SIF1.pdf', 'characterLists/characters_SIF')
     plotgraph(adjMatrix, names, 'A Song of Ice and Fire: A Game of Thrones', 'SIF1.png', communityThreshold=25, characterTheshold=0.1)
