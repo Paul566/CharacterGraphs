@@ -9,6 +9,22 @@ from persim import plot_diagrams
 import matplotlib.pyplot as plt
 
 
+l = [["Anna Pavlovna", "Scherer"], ["Vasili Kuragin", "Prince Vasili"], ["Helene", "Countess Bezukhova"],
+     ["Pierre"], ["Hippolyte Kuragin", "Hippolyte"], ["Andrei Nikolayevich Bolkonsky", "Andrew"],
+     ["Anna Mikhaylovna Drubetskaya", "Princess Drubetskaya"], ["Anatole Kuragin", "Anatole"], ["Dolokhov"],
+     ["Natasha Rostova", "Natasha"], ["Vera Rostova", "Vera"], ["Nikolai Rostov", "Nicholas"],
+     ["Nikolay Andreevitch Bolkonsky", "Nicholas Andreevich", "Nicholas Bolkonski", "Prince Bolkonski"],
+     ["Petya Rostov", "Petya"], ["Sonya"], ["Boris Drubetskoy", "Boris"], ["Shinshin"],
+     ["Alphonse Karlovich Berg", "Berg"], ["Marya Dmitrievna"], ["Marya Bolkonskaya", "Princess Mary"],
+     ["Mademoiselle Bourienne", "Bourienne"], ["Tikhon Shtcherbatov", "Tikhon"],
+     ["Michael Ivanovich"], ["Kutuzov"], ["Nesvitski"], ["Zherkov"], ["General Mack", "Mack"], ["Denisov"],
+     ["Lavrushka"], ["Bilibin"], ["Emperor Francis", "Francis"], ["Bagration"], ["Tushin"], ["Yakov Alpatych"],
+     ["Alexander I", "Alexander"], ["Weyrother"], ["Napoleon", "Bonaparte"], ["Willarski"],
+     ["Arakcheev"], ["Rostopchin"], ["Balaga"], ["Murat"]]
+with open('characters_WP_en', 'w') as f:
+    json.dump(l, f)
+
+
 def getConnectionData(pdfFilename, charactersFilename):
     with open(charactersFilename, 'r') as f:
         characters = json.load(f)
@@ -51,7 +67,7 @@ def getConnectionData(pdfFilename, charactersFilename):
     return adjMatrix, names
 
 
-def getDistanceMatrix(adjMatrix):
+def getDistanceMatrix(adjMatrix, epsilon=1.):
     m = len(adjMatrix)
     distMatrix = np.zeros((m, m))
     degs = np.zeros(m)
@@ -59,7 +75,7 @@ def getDistanceMatrix(adjMatrix):
         degs[i] = np.sum(adjMatrix[i])
     for i in range(m):
         for j in range(i):
-            distMatrix[i][j] = np.sqrt((degs[i] + 1) * (degs[j] + 1)) / (adjMatrix[i][j] + 1)
+            distMatrix[i][j] = np.sqrt((degs[i] + 1) * (degs[j] + 1)) / (adjMatrix[i][j] + epsilon)
             distMatrix[j][i] = distMatrix[i][j]
     return distMatrix
 
@@ -139,55 +155,61 @@ def plotHomologies(adjMatrix, title, picFilename):
 
 
 def plotAll():
-    adjMatrix, names = getConnectionData(['pdfs/SIF1.pdf', 'pdfs/SIF2.pdf', 'pdfs/SIF3.pdf', 'pdfs/SIF4.pdf', 'pdfs/SIF5.pdf'], 'characters_SIF')
+    adjMatrix, names = getConnectionData(['pdfs/SIF1.pdf', 'pdfs/SIF2.pdf', 'pdfs/SIF3.pdf', 'pdfs/SIF4.pdf', 'pdfs/SIF5.pdf'], 'characterLists/characters_SIF')
     plotHomologies(adjMatrix, 'A Song of Ice and Fire (1 - 5)', 'SIFhom.png')
-    adjMatrix, names = getConnectionData(['pdfs/LTR1.pdf', 'pdfs/LTR2.pdf', 'pdfs/LTR3.pdf'], 'characters_LTR')
+    adjMatrix, names = getConnectionData(['pdfs/LTR1.pdf', 'pdfs/LTR2.pdf', 'pdfs/LTR3.pdf'], 'characterLists/characters_LTR')
     plotHomologies(adjMatrix, 'The Lord of the Rings (1 - 3)', 'LTRhom.png')
-    adjMatrix, names = getConnectionData(['pdfs/HP1.pdf', 'pdfs/HP2.pdf', 'pdfs/HP3.pdf', 'pdfs/HP4.pdf', 'pdfs/HP5.pdf', 'pdfs/HP6.pdf', 'pdfs/HP7.pdf'], 'characters_HP')
+    adjMatrix, names = getConnectionData(['pdfs/HP1.pdf', 'pdfs/HP2.pdf', 'pdfs/HP3.pdf', 'pdfs/HP4.pdf', 'pdfs/HP5.pdf', 'pdfs/HP6.pdf', 'pdfs/HP7.pdf'], 'characterLists/characters_HP')
     plotHomologies(adjMatrix, 'Harry Potter (1 - 7)', 'HPhom.png')
-    adjMatrix, names = getConnectionData('pdfs/WP.pdf', 'characters_WP')
+    adjMatrix, names = getConnectionData('pdfs/WP.pdf', 'characterLists/characters_WP')
     plotHomologies(adjMatrix, 'Война и мир', 'WPhom.png')
-    adjMatrix, names = getConnectionData('pdfs/MM.pdf', 'characters_MM')
+    plotHomologies(adjMatrix, 'War and Peace', 'WPhom_en.png')
+    adjMatrix, names = getConnectionData('pdfs/MM.pdf', 'characterLists/characters_MM')
     plotHomologies(adjMatrix, 'Мастер и Маргарита', 'MMhom.png')
+    plotHomologies(adjMatrix, 'The Master and Margarita', 'MMhom_en.png')
 
-    adjMatrix, names = getConnectionData('pdfs/HP1.pdf', 'characters_HP')
+    adjMatrix, names = getConnectionData('pdfs/HP1.pdf', 'characterLists/characters_HP')
     plotgraph(adjMatrix, names, 'Harry Potter and the Philosopher\'s Stone', 'HP1.png', communityThreshold=12)
-    adjMatrix, names = getConnectionData('pdfs/HP2.pdf', 'characters_HP')
+    adjMatrix, names = getConnectionData('pdfs/HP2.pdf', 'characterLists/characters_HP')
     plotgraph(adjMatrix, names, 'Harry Potter and the Chamber of Secrets', 'HP2.png', communityThreshold=15)
-    adjMatrix, names = getConnectionData('pdfs/HP3.pdf', 'characters_HP')
+    adjMatrix, names = getConnectionData('pdfs/HP3.pdf', 'characterLists/characters_HP')
     plotgraph(adjMatrix, names, 'Harry Potter and the Prisoner of Azkaban', 'HP3.png', communityThreshold=12)
-    adjMatrix, names = getConnectionData('pdfs/HP4.pdf', 'characters_HP')
+    adjMatrix, names = getConnectionData('pdfs/HP4.pdf', 'characterLists/characters_HP')
     plotgraph(adjMatrix, names, 'Harry Potter and the Goblet of Fire', 'HP4.png', communityThreshold=13)
-    adjMatrix, names = getConnectionData('pdfs/HP5.pdf', 'characters_HP')
+    adjMatrix, names = getConnectionData('pdfs/HP5.pdf', 'characterLists/characters_HP')
     plotgraph(adjMatrix, names, 'Harry Potter and the Order of the Phoenix', 'HP5.png', communityThreshold=13)
-    adjMatrix, names = getConnectionData('pdfs/HP6.pdf', 'characters_HP')
+    adjMatrix, names = getConnectionData('pdfs/HP6.pdf', 'characterLists/characters_HP')
     plotgraph(adjMatrix, names, 'Harry Potter and the Half-Blood Prince', 'HP6.png', communityThreshold=15)
-    adjMatrix, names = getConnectionData('pdfs/HP7.pdf', 'characters_HP')
+    adjMatrix, names = getConnectionData('pdfs/HP7.pdf', 'characterLists/characters_HP')
     plotgraph(adjMatrix, names, 'Harry Potter and the Deathly Hallows', 'HP7.png', communityThreshold=14)
 
-    adjMatrix, names = getConnectionData('pdfs/LTR1.pdf', 'characters_LTR')
+    adjMatrix, names = getConnectionData('pdfs/LTR1.pdf', 'characterLists/characters_LTR')
     plotgraph(adjMatrix, names, 'The Lord of the Rings: The Fellowship of the Ring', 'LTR1.png', communityThreshold=20)
-    adjMatrix, names = getConnectionData('pdfs/LTR2.pdf', 'characters_LTR')
+    adjMatrix, names = getConnectionData('pdfs/LTR2.pdf', 'characterLists/characters_LTR')
     plotgraph(adjMatrix, names, 'The Lord of the Rings: The Two Towers', 'LTR2.png', communityThreshold=20)
-    adjMatrix, names = getConnectionData('pdfs/LTR3.pdf', 'characters_LTR')
+    adjMatrix, names = getConnectionData('pdfs/LTR3.pdf', 'characterLists/characters_LTR')
     plotgraph(adjMatrix, names, 'The Lord of the Rings: The Return of the King', 'LTR3.png', communityThreshold=25)
 
-    adjMatrix, names = getConnectionData('pdfs/WP.pdf', 'characters_WP')
+    adjMatrix, names = getConnectionData('pdfs/WP.pdf', 'characterLists/characters_WP')
     plotgraph(adjMatrix, names, 'Война и мир', 'WP.png', communityThreshold=15)
+    adjMatrix, names = getConnectionData('pdfs/WP.pdf', 'characterLists/characters_WP_en')
+    plotgraph(adjMatrix, names, 'War and Peace', 'WP_en.png', communityThreshold=15)
 
-    adjMatrix, names = getConnectionData('pdfs/MM.pdf', 'characters_MM')
+    adjMatrix, names = getConnectionData('pdfs/MM.pdf', 'characterLists/characters_MM')
     plotgraph(adjMatrix, names, 'Мастер и Маргарита', 'MM.png', communityThreshold=25)
+    adjMatrix, names = getConnectionData('pdfs/MM.pdf', 'characterLists/characters_MM_en')
+    plotgraph(adjMatrix, names, 'The Master and Margarite', 'MM_en.png', communityThreshold=25)
 
-    adjMatrix, names = getConnectionData('pdfs/SIF1.pdf', 'characters_SIF')
-    plotgraph(adjMatrix, names, 'A Game of Thrones', 'SIF1.png', communityThreshold=25, characterTheshold=0.1)
-    adjMatrix, names = getConnectionData('pdfs/SIF2.pdf', 'characters_SIF')
-    plotgraph(adjMatrix, names, 'A Clash of Kings', 'SIF2.png', communityThreshold=17)
-    adjMatrix, names = getConnectionData('pdfs/SIF3.pdf', 'characters_SIF')
-    plotgraph(adjMatrix, names, 'A Storm of Swords', 'SIF3.png', communityThreshold=20)
-    adjMatrix, names = getConnectionData('pdfs/SIF4.pdf', 'characters_SIF')
-    plotgraph(adjMatrix, names, 'A Feast for Crows', 'SIF4.png', communityThreshold=13)
-    adjMatrix, names = getConnectionData('pdfs/SIF5.pdf', 'characters_SIF')
-    plotgraph(adjMatrix, names, 'A Dance with Dragons', 'SIF5.png', communityThreshold=21)
+    adjMatrix, names = getConnectionData('pdfs/SIF1.pdf', 'characterLists/characters_SIF')
+    plotgraph(adjMatrix, names, 'A Song of Ice and Fire: A Game of Thrones', 'SIF1.png', communityThreshold=25, characterTheshold=0.1)
+    adjMatrix, names = getConnectionData('pdfs/SIF2.pdf', 'characterLists/characters_SIF')
+    plotgraph(adjMatrix, names, 'A Song of Ice and Fire: A Clash of Kings', 'SIF2.png', communityThreshold=17)
+    adjMatrix, names = getConnectionData('pdfs/SIF3.pdf', 'characterLists/characters_SIF')
+    plotgraph(adjMatrix, names, 'A Song of Ice and Fire: A Storm of Swords', 'SIF3.png', communityThreshold=20)
+    adjMatrix, names = getConnectionData('pdfs/SIF4.pdf', 'characterLists/characters_SIF')
+    plotgraph(adjMatrix, names, 'A Song of Ice and Fire: A Feast for Crows', 'SIF4.png', communityThreshold=13)
+    adjMatrix, names = getConnectionData('pdfs/SIF5.pdf', 'characterLists/characters_SIF')
+    plotgraph(adjMatrix, names, 'A Song of Ice and Fire: A Dance with Dragons', 'SIF5.png', communityThreshold=21)
 
 
 if __name__ == '__main__':
