@@ -2,7 +2,7 @@ Take a book. Count the number of pages where the two given characters are mentio
 
 ![](figures/LTR3.png)
 ![](figures/SIF4.png)
-![](figures/HP2.png)
+![](figures/HP1.png)
 ![](figures/WP_en.png)
 ![](figures/MM_en.png)
 
